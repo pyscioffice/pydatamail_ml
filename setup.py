@@ -12,7 +12,7 @@ setup(
     description='pydatamail_ml - Machine Learning extension for pydatamail',
     long_description=Path("README.md").read_text(),
     long_description_content_type='text/markdown',
-    url='https://github.com/pyscioffice/pydatamail',
+    url='https://github.com/pyscioffice/pydatamail_ml',
     author='Jan Janssen',
     author_email='jan.janssen@outlook.com',
     license='BSD',
