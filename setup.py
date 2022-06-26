@@ -18,14 +18,15 @@ setup(
     license='BSD',
     packages=find_packages(exclude=["*tests*"]),
     install_requires=[
-        'numpy==1.23.0',
-        'tqdm==4.64.0',
-        'pandas==1.4.3',
-        'sqlalchemy==1.4.39',
-        'scikit-learn==1.1.1',
         'bleach==5.0.0',
         'cssutils==2.4.2',
         'langdetect==1.0.9',
+        'numpy==1.23.0',
+        'pandas==1.4.3',
+        'pydatamail==0.0.5',
+        'scikit-learn==1.1.1',
+        'sqlalchemy==1.4.39',
+        'tqdm==4.64.0',
     ],
     cmdclass=versioneer.get_cmdclass()
 )
