@@ -7,9 +7,9 @@ import versioneer
 
 
 setup(
-    name='pydatamail',
+    name='pydatamail_ml',
     version=versioneer.get_version(),
-    description='pydatamail - a python module to apply data science principles to email processing',
+    description='pydatamail_ml - Machine Learning extension for pydatamail',
     long_description=Path("README.md").read_text(),
     long_description_content_type='text/markdown',
     url='https://github.com/pyscioffice/pydatamail',
