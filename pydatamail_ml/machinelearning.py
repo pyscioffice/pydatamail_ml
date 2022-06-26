@@ -2,16 +2,10 @@ import pandas
 import pickle
 import numpy as np
 from tqdm import tqdm
-import warnings
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import declarative_base
 from pydatamail.database import DatabaseTemplate
-
-
-try:
-    from sklearn.ensemble import RandomForestClassifier
-except ImportError:
-    warnings.warn("Machine learning requires scikit-learn")
+from sklearn.ensemble import RandomForestClassifier
 
 
 Base = declarative_base()
