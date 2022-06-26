@@ -4,6 +4,10 @@ dependencies:
 - python
 - coverage
 - coveralls
+- numpy =1.23.0
+- tqdm =4.64.0
+- pandas =1.4.3
+- sqlalchemy =1.4.39
 - scikit-learn =1.1.1
 - bleach =5.0.0
 - cssutils =2.4.2
