@@ -23,7 +23,7 @@ setup(
         'langdetect==1.0.9',
         'numpy==1.23.0',
         'pandas==1.4.3',
-        'pydatamail==0.0.7',
+        'pydatamail==0.0.9',
         'scikit-learn==1.1.1',
         'sqlalchemy==1.4.39',
         'tqdm==4.64.0',
