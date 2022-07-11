@@ -21,7 +21,7 @@ setup(
         'bleach==5.0.1',
         'cssutils==2.4.2',
         'langdetect==1.0.9',
-        'numpy==1.23.0',
+        'numpy==1.23.1',
         'pandas==1.4.3',
         'pydatamail==0.0.7',
         'scikit-learn==1.1.1',
