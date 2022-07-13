@@ -19,7 +19,7 @@ setup(
     packages=find_packages(exclude=["*tests*"]),
     install_requires=[
         'bleach==5.0.1',
-        'cssutils==2.4.2',
+        'cssutils==2.5.0',
         'langdetect==1.0.9',
         'numpy==1.23.1',
         'pandas==1.4.3',
