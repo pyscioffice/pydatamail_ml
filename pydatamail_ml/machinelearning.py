@@ -137,72 +137,58 @@ def _build_red_lst(df_column):
     return list(set(collect_lst))
 
 
-def _single_entry_df(df, red_lst, column):
-    return [
-        {
-            column + "_" + red_entry: 1 if email == red_entry else 0
-            for red_entry in red_lst
-            if red_entry is not None
-        }
-        for email in df[column].values
-    ]
+def _single_entry_df(red_lst, value_lst):
+    return np.array(
+        [
+            [
+                1 if email == red_entry else 0
+                for red_entry in red_lst
+                if red_entry is not None
+            ]
+            for email in value_lst
+        ]
+    )
 
 
-def _single_entry_email_df(df, red_lst, column):
-    return [
-        {
-            column + "_" + red_entry: 1 if red_entry in email else 0
-            for red_entry in red_lst
-            if red_entry is not None
-        }
-        for email in df[column].values
-        if email is not None
-    ]
+def _single_entry_email_df(red_lst, value_lst):
+    return np.array(
+        [
+            [
+                1 if email is not None and red_entry in email else 0
+                for red_entry in red_lst
+                if red_entry is not None
+            ]
+            for email in value_lst
+        ]
+    )
 
 
-def _list_entry_df(df, red_lst, column):
-    return [
-        {
-            column + "_" + red_entry: 1 if red_entry in email else 0
-            for red_entry in red_lst
-        }
-        for email in df[column].values
-    ]
+def _list_entry_df(red_lst, value_lst):
+    return np.array(
+        [
+            [1 if red_entry in email else 0 for red_entry in red_lst]
+            for email in value_lst
+        ]
+    )
 
 
-def _list_entry_email_df(df, red_lst, column):
-    return [
-        {
-            column + "_" + red_entry: 1 if any([red_entry in e for e in email]) else 0
-            for red_entry in red_lst
-        }
-        for email in df[column].values
-    ]
-
-
-def _merge_dicts(
-    email_id, label_dict, cc_dict, from_dict, threads_dict, to_dict, label_lst
-):
-    email_dict_prep = {"email_id": email_id}
-    email_dict_prep.update(label_dict)
-    email_dict_prep.update(cc_dict)
-    email_dict_prep.update(from_dict)
-    email_dict_prep.update(threads_dict)
-    email_dict_prep.update(to_dict)
-    if len(label_lst) == 0:
-        return email_dict_prep
-    else:
-        email_dict = {k: v for k, v in email_dict_prep.items() if k in label_lst}
-        email_dict.update(
-            {label: 0 for label in label_lst if label not in email_dict.keys()}
-        )
-        return email_dict
+def _list_entry_email_df(red_lst, value_lst):
+    return np.array(
+        [
+            [1 if any([red_entry in e for e in email]) else 0 for red_entry in red_lst]
+            for email in value_lst
+        ]
+    )
 
 
 def _get_training_input(df):
     return df.drop(
         [c for c in df.columns.values if "labels_" in c] + ["email_id"], axis=1
     )
+
+
+def _get_lst_without_none(lst, column):
+    return [column + "_" + entry for entry in lst if entry is not None]
 
 
 def train_model(
@@ -241,7 +227,7 @@ def get_machine_learning_recommendations(
     label_lst = list(predictions.keys())
     prediction_array = np.array(list(predictions.values())).T
     new_label_lst = [
-        label_lst[email] if np.max(values) > recommendation_ratio else None
+        label_lst[email] if np.max(values) > float(recommendation_ratio) else None
         for email, values in zip(
             np.argsort(prediction_array, axis=1)[:, -1], prediction_array
         )
@@ -285,45 +271,52 @@ def gather_data_for_machine_learning(df_all, labels_dict, labels_to_exclude_lst=
 
 
 def one_hot_encoding(df, label_lst=[]):
+    labels_red_lst = _build_red_lst(df_column=df.labels.values)
+    cc_red_lst = _build_red_lst(df_column=df.cc.values)
+    thread_red_lst = df["threads"].unique()
+    to_red_lst = _build_red_lst(df_column=df.to.values)
+    from_red_lst = [email for email in df["from"].unique() if email is not None] + list(
+        set(
+            [
+                "@" + email.split("@")[-1]
+                for email in df["from"].unique()
+                if email is not None and "@" in email
+            ]
+        )
+    )
     dict_labels_lst = _list_entry_df(
-        df=df, red_lst=_build_red_lst(df_column=df.labels.values), column="labels"
+        red_lst=labels_red_lst, value_lst=df["labels"].values
     )
-    dict_cc_lst = _list_entry_email_df(
-        df=df, red_lst=_build_red_lst(df_column=df.cc.values), column="cc"
+    dict_cc_lst = _list_entry_email_df(red_lst=cc_red_lst, value_lst=df["cc"].values)
+    dict_from_lst = _single_entry_email_df(
+        red_lst=from_red_lst, value_lst=df["from"].values
     )
-    red_email_lst = [email for email in df["from"].unique() if email is not None] + [
-        "@" + email.split("@")[-1]
-        for email in df["from"].unique()
-        if email is not None and "@" in email
-    ]
-    dict_from_lst = _single_entry_email_df(df=df, red_lst=red_email_lst, column="from")
     dict_threads_lst = _single_entry_df(
-        df=df, red_lst=df["threads"].unique(), column="threads"
+        red_lst=thread_red_lst, value_lst=df["threads"].values
     )
-    dict_to_lst = _list_entry_email_df(
-        df=df, red_lst=_build_red_lst(df_column=df.to.values), column="to"
+    dict_to_lst = _list_entry_email_df(red_lst=to_red_lst, value_lst=df["to"].values)
+    all_binary_values = np.hstack(
+        (dict_labels_lst, dict_cc_lst, dict_from_lst, dict_threads_lst, dict_to_lst)
     )
-    return pandas.DataFrame(
-        [
-            _merge_dicts(
-                email_id=email_id,
-                label_dict=label_dict,
-                cc_dict=cc_dict,
-                from_dict=from_dict,
-                threads_dict=threads_dict,
-                to_dict=to_dict,
-                label_lst=label_lst,
-            )
-            for email_id, label_dict, cc_dict, from_dict, threads_dict, to_dict in zip(
-                df.id.values,
-                dict_labels_lst,
-                dict_cc_lst,
-                dict_from_lst,
-                dict_threads_lst,
-                dict_to_lst,
-            )
-        ]
+    all_labels = (
+        _get_lst_without_none(lst=labels_red_lst, column="labels")
+        + _get_lst_without_none(lst=cc_red_lst, column="cc")
+        + _get_lst_without_none(lst=from_red_lst, column="from")
+        + _get_lst_without_none(lst=thread_red_lst, column="threads")
+        + _get_lst_without_none(lst=to_red_lst, column="to")
     )
+    if len(label_lst) == 0:
+        df_new = pandas.DataFrame(all_binary_values, columns=all_labels)
+    else:
+        labels_to_drop = [label for label in all_labels if label not in label_lst]
+        labels_to_add = [label for label in label_lst if label not in all_labels]
+        df_new = pandas.DataFrame(
+            np.hstack((all_binary_values, np.zeros((len(df), len(labels_to_add))))),
+            columns=all_labels + labels_to_add,
+        )
+        df_new.drop(labels_to_drop, inplace=True, axis=1)
+    df_new["email_id"] = df.id.values
+    return df_new
 
 
 def get_machine_learning_database(engine, session):
