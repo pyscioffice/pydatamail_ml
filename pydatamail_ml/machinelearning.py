@@ -201,7 +201,7 @@ def train_model(
 ):
     if labels_to_learn is None:
         labels_to_learn = [c for c in df.columns.values if "labels_Label_" in c]
-    df_in = _get_training_input(df=df).sort_index(axis=1)
+    df_in = _get_training_input(df=df)
     return {
         to_learn.split("labels_")[-1]: RandomForestClassifier(
             n_estimators=n_estimators,
@@ -222,7 +222,7 @@ def get_machine_learning_recommendations(
     df_select_red = _get_training_input(df=df_select_hot)
 
     predictions = {
-        k: v.predict(df_select_red.sort_index(axis=1)) for k, v in models.items()
+        k: v.predict(df_select_red) for k, v in models.items()
     }
     label_lst = list(predictions.keys())
     prediction_array = np.array(list(predictions.values())).T
@@ -316,7 +316,7 @@ def one_hot_encoding(df, label_lst=[]):
         )
         df_new.drop(labels_to_drop, inplace=True, axis=1)
     df_new["email_id"] = df.id.values
-    return df_new
+    return df_new.sort_index(axis=1)
 
 
 def get_machine_learning_database(engine, session):
