@@ -138,45 +138,47 @@ def _build_red_lst(df_column):
 
 
 def _single_entry_df(red_lst, value_lst):
-    return np.array([
+    return np.array(
         [
-            1 if email == red_entry else 0
-            for red_entry in red_lst
-            if red_entry is not None
+            [
+                1 if email == red_entry else 0
+                for red_entry in red_lst
+                if red_entry is not None
+            ]
+            for email in value_lst
         ]
-        for email in value_lst
-    ])
+    )
 
 
 def _single_entry_email_df(red_lst, value_lst):
-    return np.array([
+    return np.array(
         [
-            1 if email is not None and red_entry in email else 0
-            for red_entry in red_lst
-            if red_entry is not None
+            [
+                1 if email is not None and red_entry in email else 0
+                for red_entry in red_lst
+                if red_entry is not None
+            ]
+            for email in value_lst
         ]
-        for email in value_lst
-    ])
+    )
 
 
 def _list_entry_df(red_lst, value_lst):
-    return np.array([
+    return np.array(
         [
-            1 if red_entry in email else 0
-            for red_entry in red_lst
+            [1 if red_entry in email else 0 for red_entry in red_lst]
+            for email in value_lst
         ]
-        for email in value_lst
-    ])
+    )
 
 
 def _list_entry_email_df(red_lst, value_lst):
-    return np.array([
+    return np.array(
         [
-            1 if any([red_entry in e for e in email]) else 0
-            for red_entry in red_lst
+            [1 if any([red_entry in e for e in email]) else 0 for red_entry in red_lst]
+            for email in value_lst
         ]
-        for email in value_lst
-    ])
+    )
 
 
 def _get_training_input(df):
@@ -273,39 +275,36 @@ def one_hot_encoding(df, label_lst=[]):
     cc_red_lst = _build_red_lst(df_column=df.cc.values)
     thread_red_lst = df["threads"].unique()
     to_red_lst = _build_red_lst(df_column=df.to.values)
-    from_red_lst = [email for email in df["from"].unique() if email is not None] + \
-        list(set([
-            "@" + email.split("@")[-1]
-            for email in df["from"].unique()
-            if email is not None and "@" in email
-        ]))
+    from_red_lst = [email for email in df["from"].unique() if email is not None] + list(
+        set(
+            [
+                "@" + email.split("@")[-1]
+                for email in df["from"].unique()
+                if email is not None and "@" in email
+            ]
+        )
+    )
     dict_labels_lst = _list_entry_df(
         red_lst=labels_red_lst, value_lst=df["labels"].values
     )
-    dict_cc_lst = _list_entry_email_df(
-        red_lst=cc_red_lst, value_lst=df["cc"].values
-    )
+    dict_cc_lst = _list_entry_email_df(red_lst=cc_red_lst, value_lst=df["cc"].values)
     dict_from_lst = _single_entry_email_df(
         red_lst=from_red_lst, value_lst=df["from"].values
     )
     dict_threads_lst = _single_entry_df(
         red_lst=thread_red_lst, value_lst=df["threads"].values
     )
-    dict_to_lst = _list_entry_email_df(
-        red_lst=to_red_lst, value_lst=df["to"].values
+    dict_to_lst = _list_entry_email_df(red_lst=to_red_lst, value_lst=df["to"].values)
+    all_binary_values = np.hstack(
+        (dict_labels_lst, dict_cc_lst, dict_from_lst, dict_threads_lst, dict_to_lst)
     )
-    all_binary_values = np.hstack((
-        dict_labels_lst,
-        dict_cc_lst,
-        dict_from_lst,
-        dict_threads_lst,
-        dict_to_lst
-    ))
-    all_labels = _get_lst_without_none(lst=labels_red_lst, column="labels") \
-        + _get_lst_without_none(lst=cc_red_lst, column="cc") \
-        + _get_lst_without_none(lst=from_red_lst, column="from") \
-        + _get_lst_without_none(lst=thread_red_lst, column="threads") \
+    all_labels = (
+        _get_lst_without_none(lst=labels_red_lst, column="labels")
+        + _get_lst_without_none(lst=cc_red_lst, column="cc")
+        + _get_lst_without_none(lst=from_red_lst, column="from")
+        + _get_lst_without_none(lst=thread_red_lst, column="threads")
         + _get_lst_without_none(lst=to_red_lst, column="to")
+    )
     if len(label_lst) == 0:
         df_new = pandas.DataFrame(all_binary_values, columns=all_labels)
     else:
@@ -313,7 +312,7 @@ def one_hot_encoding(df, label_lst=[]):
         labels_to_add = [label for label in label_lst if label not in all_labels]
         df_new = pandas.DataFrame(
             np.hstack((all_binary_values, np.zeros((len(df), len(labels_to_add))))),
-            columns=all_labels + labels_to_add
+            columns=all_labels + labels_to_add,
         )
         df_new.drop(labels_to_drop, inplace=True, axis=1)
     df_new["email_id"] = df.id.values
