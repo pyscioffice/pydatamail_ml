@@ -147,7 +147,7 @@ def _single_entry_df(red_lst, value_lst):
             ]
             for email in value_lst
         ]
-    )
+    ).astype("float64")
 
 
 def _single_entry_email_df(red_lst, value_lst):
@@ -160,7 +160,7 @@ def _single_entry_email_df(red_lst, value_lst):
             ]
             for email in value_lst
         ]
-    )
+    ).astype("float64")
 
 
 def _list_entry_df(red_lst, value_lst):
@@ -169,7 +169,7 @@ def _list_entry_df(red_lst, value_lst):
             [1 if red_entry in email else 0 for red_entry in red_lst]
             for email in value_lst
         ]
-    )
+    ).astype("float64")
 
 
 def _list_entry_email_df(red_lst, value_lst):
@@ -178,7 +178,7 @@ def _list_entry_email_df(red_lst, value_lst):
             [1 if any([red_entry in e for e in email]) else 0 for red_entry in red_lst]
             for email in value_lst
         ]
-    )
+    ).astype("float64")
 
 
 def _get_training_input(df):
@@ -221,9 +221,7 @@ def get_machine_learning_recommendations(
     )
     df_select_red = _get_training_input(df=df_select_hot)
 
-    predictions = {
-        k: v.predict(df_select_red) for k, v in models.items()
-    }
+    predictions = {k: v.predict(df_select_red) for k, v in models.items()}
     label_lst = list(predictions.keys())
     prediction_array = np.array(list(predictions.values())).T
     new_label_lst = [
