@@ -24,7 +24,7 @@ setup(
         'numpy==1.23.1',
         'pandas==1.4.3',
         'pydatamail==0.0.9',
-        'scikit-learn==1.1.1',
+        'scikit-learn==1.1.2',
         'sqlalchemy==1.4.39',
         'tqdm==4.64.0',
     ],
