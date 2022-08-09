@@ -25,7 +25,7 @@ setup(
         'pandas==1.4.3',
         'pydatamail==0.0.9',
         'scikit-learn==1.1.2',
-        'sqlalchemy==1.4.39',
+        'sqlalchemy==1.4.40',
         'tqdm==4.64.0',
     ],
     cmdclass=versioneer.get_cmdclass()
