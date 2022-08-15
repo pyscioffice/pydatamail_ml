@@ -209,7 +209,9 @@ def train_model(
             bootstrap=bootstrap,
             max_features=max_features,
         ).fit(df_in, df[to_learn])
-        for to_learn in tqdm(labels_to_learn)
+        for to_learn in tqdm(
+            iterable=labels_to_learn, desc="Train machinelearning models"
+        )
     }
 
 
