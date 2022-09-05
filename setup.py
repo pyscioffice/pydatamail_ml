@@ -26,7 +26,7 @@ setup(
         'pydatamail==0.0.10',
         'scikit-learn==1.1.2',
         'sqlalchemy==1.4.40',
-        'tqdm==4.64.0',
+        'tqdm==4.64.1',
     ],
     cmdclass=versioneer.get_cmdclass()
 )
