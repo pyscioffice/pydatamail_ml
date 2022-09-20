@@ -22,7 +22,7 @@ setup(
         'cssutils==2.6.0',
         'langdetect==1.0.9',
         'numpy==1.23.3',
-        'pandas==1.4.4',
+        'pandas==1.5.0',
         'pydatamail==0.0.10',
         'scikit-learn==1.1.2',
         'sqlalchemy==1.4.41',
